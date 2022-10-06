@@ -5,11 +5,11 @@ require 'fastlane/plugin/installonair/version'
 Gem::Specification.new do |spec|
   spec.name          = 'fastlane-plugin-installonair'
   spec.version       = Fastlane::Installonair::VERSION
-  spec.author        = 'QuocTA-Amela'
-  spec.email         = '101373375+QuocTA-Amela@users.noreply.github.com'
+  spec.author        = %q{SpQuyt}
+  spec.email         = %q{spquyt@gmail.com}
 
   spec.summary       = 'Install On Air plugin integrated with Fastlane'
-  # spec.homepage      = "https://github.com/<GITHUB_USERNAME>/fastlane-plugin-installonair"
+  spec.homepage      = "https://github.com/SpQuyt/fastlane-plugin-installonair.git"
   spec.license       = "MIT"
 
   spec.files         = Dir["lib/**/*"] + %w(README.md LICENSE)
