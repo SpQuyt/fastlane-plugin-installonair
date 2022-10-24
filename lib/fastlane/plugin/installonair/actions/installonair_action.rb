@@ -30,7 +30,7 @@ module Fastlane
         end
         
         UI.success("Start uploading file to Install On Air. Please, be patient. This could take some time.")
-        spinner = TTY::Spinner.new("[:spinner] Uploading ...\n", format: :pulse_2)
+        spinner = TTY::Spinner.new("[:spinner] Uploading ...", format: :pulse_2)
         spinner.auto_spin
         payload = {
           _token: options[:token],
