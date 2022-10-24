@@ -10,15 +10,14 @@ module Fastlane
 
     class InstallonairAction < Action
 
-      UPLOAD_URL = "https://fupload.installonair.com/ipafile/"
-      STATUS_CHECK_URL = "https://upload.diawi.com/status"
-      DIAWI_FILE_LINK = "https://i.diawi.com"
+      UPLOAD_URL = "https://fupload.installonair.com/ipafile"
 
       def self.run(options)
         UI.message("The installonair plugin is working!")
         Actions.verify_gem!('rest-client')
         require 'rest-client'
         require 'json'
+        require 'tty-spinner'
   
         if options[:file].nil?
           UI.important("File didn't come to install_on_air_plugin. Uploading is unavailable.")
@@ -29,43 +28,30 @@ module Fastlane
           UI.important("Try to upload file by yourself. Path: #{options[:file]}")
           return
         end
-
-        upload_options = options.values.select do |key, value|
-          [:password, :comment].include? key unless value.nil?
-        end
-
-        options.values.each do |key, value|
-            if [:find_by_udid, :wall_of_apps, :installation_notifications].include? key
-                upload_options[key] = value ? 1 : 0 unless value.nil?
-            end
-        end
-  
-        upload_options[:_token] = options[:token]
-        upload_options[:file] = File.new(options[:file], 'rb')
+        
         UI.success("Start uploading file to Install On Air. Please, be patient. This could take some time.")
-        response = RestClient.post(UPLOAD_URL, upload_options)
-  
+        spinner = TTY::Spinner.new("[:spinner] Uploading ...", format: :pulse_2)
+        spinner.auto_spin
+        payload = {
+          _token: options[:token],
+          ipafile: File.new(options[:file], 'rb')
+        }
+        response = RestClient.post(UPLOAD_URL, payload)
         begin
           response
         rescue RestClient::ExceptionWithResponse => error
-            UI.important("Faild to upload file to diawi, because of:")
-            UI.important(error)
-            UI.important("Try to upload file by yourself. Path: #{options[:file]}")
-            return
+          puts error.response
+          UI.important("Failed to upload file to install on air, because of:")
+          UI.important(error)
+          UI.important("Try to upload file by yourself. Path: #{options[:file]}")
         end
-  
-        job = JSON.parse(response.body)['job']
-        
-        if job
-            timeout = options[:timeout].clamp(5, 1800)
-            check_status_delay = options[:check_status_delay].clamp(1, 30)
-  
-            if check_status_delay > timeout
-                UI.important("`check_status_delay` is greater than `timeout`")
-            end
-  
-            UI.success("Upload completed successfully.")
-        end  
+        data = JSON.parse(response.body)['data']
+        if data
+          UI.message("Uploaded!")
+          UI.success("File successfully uploaded to InstallOnAir. Link: #{data['link']}")
+          Actions.lane_context[SharedValues::UPLOADED_FILE_LINK_TO_INSTALL_ON_AIR] = data['link']
+          return
+        end
       end
 
       def self.description
