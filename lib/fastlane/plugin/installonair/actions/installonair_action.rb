@@ -45,12 +45,12 @@ module Fastlane
           UI.important(error)
           UI.important("Try to upload file by yourself. Path: #{options[:file]}")
         end
+        spinner.stop
         data = JSON.parse(response.body)['data']
         if data
           UI.message("Uploaded!")
           UI.success("File successfully uploaded to InstallOnAir. Link: #{data['link']}")
           Actions.lane_context[SharedValues::UPLOADED_FILE_LINK_TO_INSTALL_ON_AIR] = data['link']
-          return
         end
       end
 
